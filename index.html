@@ -1,12 +1,15 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <!--https://github.com/tonyg/js-scrypt-->
+  <!--https://github.com/zenorocha/clipboard.js-->
+  <!--https://github.com/ricmoo/aes-js-->
 
   <!-- Basic Page Needs
   –––––––––––––––––––––––––––––––––––––––––––––––––– -->
   <meta charset="utf-8">
   <title>HIPS</title>
-  <meta name="description" content="">
+  <!--<meta name="description" content="">-->
   <meta name="author" content="Aidan San">
 
   <!-- Mobile Specific Metas
@@ -15,7 +18,7 @@
 
   <!-- FONT
   –––––––––––––––––––––––––––––––––––––––––––––––––– -->
-  <link href="//fonts.googleapis.com/css?family=Raleway:400,300,600" rel="stylesheet" type="text/css">
+  <link href="https://fonts.googleapis.com/css?family=Raleway:400,300,600" rel="stylesheet" type="text/css">
 
   <!-- CSS
   –––––––––––––––––––––––––––––––––––––––––––––––––– -->
@@ -24,7 +27,8 @@
 
   <!-- Favicon
   –––––––––––––––––––––––––––––––––––––––––––––––––– -->
-  <link rel="icon" type="image/png" href="images/favicon.png">
+  <!--<link rel="icon" type="image/png" href="images/favicon.png">-->
+  <script src="jquery-3.1.0.min.js"></script>
   <script src="clipboard.min.js"></script>
   <script src="aes.js"></script>
   <script src="scrypt.js"></script>
@@ -36,6 +40,7 @@
   <div class="container">
     <div class="row">
         <h1>Hidden in Plain Sight-HIPS</h1> 
+        <h4>Decryption</h4> 
         <label for="passwd-to-decrypt">To Decrypt</label>
         <input id="passwd-to-decrypt" type="password" class="u-full-width">
         <label for="master-passwd">Master Password</label>
@@ -47,6 +52,21 @@
 
   <script>
     new Clipboard("#cp-btn");
+
+    scrypt_module_factory(function(scrypt){
+      var masterPassword = "really bad master password";
+      
+      var key = scrypt.crypto_scrypt(
+        scrypt.encode_utf8(masterPassword),
+        scrypt.encode_utf8("SodiumChloride"),
+        16384, 8, 1, 32);
+
+      var aesCtr = new aesjs.ModeOfOperation.ctr(key);
+      var decryptedBytes = aesCtr.decrypt(encryptedBytes);
+
+      var decryptedText = aesjs.util.convertBytesToString(decryptedBytes);
+      console.log(decryptedText);
+    });
   </script>
 <!-- End Document
   –––––––––––––––––––––––––––––––––––––––––––––––––– -->

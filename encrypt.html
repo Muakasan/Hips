@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>  
+  <!-- Basic Page Needs
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+  <meta charset="utf-8">
+  <title>HIPS</title>
+  <!--<meta name="description" content="">-->
+  <meta name="author" content="Aidan San">
+
+  <!-- Mobile Specific Metas
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!-- FONT
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+  <link href="https://fonts.googleapis.com/css?family=Raleway:400,300,600" rel="stylesheet" type="text/css">
+
+  <!-- CSS
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+  <link rel="stylesheet" href="css/normalize.css">
+  <link rel="stylesheet" href="css/skeleton.css">
+
+  <!-- Favicon
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+  <!--<link rel="icon" type="image/png" href="images/favicon.png">-->
+  <script src="jquery-3.1.0.min.js"></script>
+  <script src="clipboard.min.js"></script>
+  <script src="aes.js"></script>
+  <script src="scrypt.js"></script>
+</head>
+<body>
+
+  <!-- Primary Page Layout
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+  <div class="container">
+    <div class="row">
+        <h1>Hidden in Plain Sight-HIPS</h1>
+        <h4>Encryption</h4>  
+    </div>
+    <div class="row">
+        <label for="passwd-to-encrypt">To Encrypt</label>
+        <input id="passwd-to-encrypt" type="password" class="seven columns">
+        <a id="show-unenc-passwd" class="button button-primary two columns" href="#!">Show</a>
+        <a id="cp-unenc-passwd" class="button button-primary two columns" href="#!">Copy</a>
+    </div>
+    <div class="row">
+        <label for="num-chars">Number of chars</label>
+        <input id="num-chars" type="text" class="one-third column">
+        <label class="one-third column">
+            <input type="checkbox">
+            <span class="label-body">Symbols</span>
+        </label>
+    </div>
+    <div class="row">
+        <a id="generate-btn" class="button button-primary" href="#!">Generate</a>
+    </div><br>
+    <div class="row">
+        <label for="master-passwd">Master Password</label>
+        <input id="master-passwd" type="password" class="u-full-width">
+        <label for="r-master-passwd">Reenter Master Password</label>
+        <input id="r-master-passwd" type="password" class="u-full-width">
+        <a id="encrypt-btn" class="button button-primary" href="#!">Encrypt</a>
+    </div><br>
+    <div class="row">
+        <label for="encrypted-passwd">Encrypted Password</label>
+        <input id="encrypted-passwd" type="password" class="seven columns">
+        <a id="show-enc-passwd" class="button button-primary two columns" href="#!">Show</a>
+        <a id="cp-enc-passwd" class="button button-primary two columns" href="#!">Copy</a>
+    </div>
+  </div>
+
+  <script>
+    new Clipboard("#cp-btn");
+    $("#num-chars").val("20");
+    
+    $("#generate-btn").click(function(){
+        var numChars = parseInt($("#num-chars").val());
+        var unencryptedPassword = "";
+        for(var i = 0; i < numChars; i++)
+        {
+            unencryptedPassword += String.fromCharCode(Math.floor(26*Math.random()) + 97);
+        }
+        $("#passwd-to-encrypt").val(unencryptedPassword);
+    });
+
+    $("#show-unenc-passwd").click(function(){
+        $("#passwd-to-encrypt").attr("type", "text");
+    });
+
+    $("#show-enc-passwd").click(function(){
+        $("#encrypted-passwd").attr("type", "text");
+    });
+
+    $("#encrypt-btn").click(function(){
+        if($("#master-passwd").val() === $("#r-master-passwd").val() &&  $("#master-passwd").val()!=="")
+        {
+            scrypt_module_factory(function(scrypt){            
+                var key = scrypt.crypto_scrypt(
+                    scrypt.encode_utf8($("#master-passwd").val()),
+                    scrypt.encode_utf8("SodiumChloride"),
+                    16384, 8, 1, 32);
+
+                var text = $("#passwd-to-encrypt").val();
+                var textBytes = aesjs.util.convertStringToBytes(text);
+
+                var aesCtr = new aesjs.ModeOfOperation.ctr(key);
+                var encryptedBytes = aesCtr.encrypt(textBytes);
+                $("#encrypted-passwd").val(encryptedBytes.join(" "));
+            });
+        }
+        else
+        {
+            alert("Master passwords do not match");
+        }
+
+    });
+    
+    new Clipboard('#cp-unenc-passwd', {
+        text: function(trigger) {
+        return $("#passwd-to-encrypt").val();
+        }
+    });
+
+    new Clipboard("cp-enc-passwd"), {
+        text: function(trigger) {
+        return $("#encrypted-passwd").val();
+        }
+    });
+        
+  </script>
+<!-- End Document
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+</body>
+</html>
