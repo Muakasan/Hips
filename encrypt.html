@@ -122,7 +122,7 @@
         }
     });
 
-    new Clipboard("cp-enc-passwd"), {
+    new Clipboard("cp-enc-passwd", {
         text: function(trigger) {
         return $("#encrypted-passwd").val();
         }
