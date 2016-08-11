@@ -45,28 +45,50 @@
         <input id="passwd-to-decrypt" type="password" class="u-full-width">
         <label for="master-passwd">Master Password</label>
         <input id="master-passwd" type="password" class="u-full-width">
-        <a class="button button-primary" href="#">Decrypt</a>
-        <button id="cp-btn" class="button" href="#" data-clipboard-action="copy" data-clipboard-target="#passwd-to-decrypt">Copy to Clipboard</button>
+        <a id="decrypt-btn" class="button button-primary" href="#">Decrypt</a>
+    </div><br>
+      <div class="row">
+        <label for="decrypted-passwd">Decrypted Password</label>
+        <input id="decrypted-passwd" type="password" class="seven columns">
+        <a id="show-dec-passwd" class="button button-primary two columns" href="#!">Show</a>
+        <a id="cp-dec-passwd" class="button button-primary two columns" href="#!">Copy</a>
     </div>
   </div>
 
   <script>
-    new Clipboard("#cp-btn");
-
-    scrypt_module_factory(function(scrypt){
-      var masterPassword = "really bad master password";
-      
-      var key = scrypt.crypto_scrypt(
-        scrypt.encode_utf8(masterPassword),
-        scrypt.encode_utf8("SodiumChloride"),
-        16384, 8, 1, 32);
-
-      var aesCtr = new aesjs.ModeOfOperation.ctr(key);
-      var decryptedBytes = aesCtr.decrypt(encryptedBytes);
-
-      var decryptedText = aesjs.util.convertBytesToString(decryptedBytes);
-      console.log(decryptedText);
+    $("#show-dec-passwd").click(function(){
+      $("#decrypted-passwd").attr("type", "text");
     });
+
+    $("#decrypt-btn").click(function(){
+      scrypt_module_factory(function(scrypt){
+        var masterPassword = $("#master-passwd").val();
+        
+        var key = scrypt.crypto_scrypt(
+          scrypt.encode_utf8(masterPassword),
+          scrypt.encode_utf8("SodiumChloride"),
+          16384, 8, 1, 32);
+        
+        var encryptedText = $("#passwd-to-decrypt").val();
+        var encryptedBytes = encryptedText.split(" ").map(function(i){
+          return parseInt(i);
+        });
+        console.log(encryptedBytes);
+        var aesCtr = new aesjs.ModeOfOperation.ctr(key);
+        var decryptedBytes = aesCtr.decrypt(encryptedBytes);
+
+        var decryptedText = aesjs.util.convertBytesToString(decryptedBytes);
+        $("#decrypted-passwd").val(decryptedText);
+      });
+    });
+
+
+    new Clipboard("#cp-dec-passwd", {
+        text: function(trigger) {
+        return $("#decrypted-passwd").val();
+        }
+    });
+
   </script>
 <!-- End Document
   –––––––––––––––––––––––––––––––––––––––––––––––––– -->
